@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin - Simulasi Parkir</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+/* =====================================
+   ADMIN DASHBOARD - MODERN MAROON
+===================================== */
+
+/* Background halaman */
+body {
+  background: #f4f6fa;
+  color: #1f2937;
+}
+
+/* Judul halaman */
+.hs {
+  color: #7B0948 !important;
+  font-weight: 800;
+}
+
+.subtitlee {
+  color: #64748b !important;
+}
+
+/* Kartu dashboard */
+.container .card {
+  background: #ffffff;
+  color: #1f2937;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.04);
+}
+
+.container .card h2 {
+  color: #7B0948;
+}
+
+/* Ringkasan slot */
+.availability .box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.availability .num {
+  color: #7B0948;
+}
+
+.availability .num.kosong {
+  color: #16a34a;
+}
+
+.availability .num.terisi {
+  color: #dc2626;
+}
+
+.availability .lbl {
+  color: #64748b;
+}
+
+/* =====================================
+   PETA SLOT
+===================================== */
+
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+  gap: 12px;
+}
+
+.slot-box {
+  border-radius: 12px;
+  padding: 12px 7px;
+  text-align: center;
+  border: 1px solid;
+  transition: 0.2s ease;
+}
+
+.slot-box .kode {
+  font-size: 19px;
+  font-weight: 800;
+}
+
+/* Slot kosong */
+.slot-box.kosong {
+  background: #DCFCE7;
+  border-color: #86EFAC;
+  color: #166534;
+}
+
+.slot-box.kosong:hover {
+  background: #BBF7D0;
+}
+
+/* Slot terisi */
+.slot-box.terisi {
+  background: #FCE7F3;
+  border-color: #F9A8D4;
+  color: #9D174D;
+}
+
+.slot-box.terisi:hover {
+  background: #FBCFE8;
+}
+
+.slot-box .plat {
+  color: #475569;
+}
+
+/* Tombol aksi slot */
+.slot-box .aksi {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+  margin-top: 9px;
+}
+
+.slot-box .aksi button {
+  border: none;
+  border-radius: 6px;
+  padding: 5px 9px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+/* Tombol ubah */
+.slot-box .aksi button[data-aksi="ubah"] {
+  background: #2563EB;
+  color: #ffffff;
+}
+
+.slot-box .aksi button[data-aksi="ubah"]:hover {
+  background: #1D4ED8;
+}
+
+/* Tombol hapus */
+.slot-box .aksi button[data-aksi="hapus"] {
+  background: #DC2626;
+  color: #ffffff;
+}
+
+.slot-box .aksi button[data-aksi="hapus"]:hover {
+  background: #B91C1C;
+}
+
+/* Tombol nonaktif */
+.slot-box .aksi button:disabled {
+  background: #94A3B8 !important;
+  color: #ffffff !important;
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* =====================================
+   TABEL DAFTAR TIKET
+===================================== */
+
+table.data {
+  color: #334155;
+  background: #ffffff;
+}
+
+table.data th {
+  background: #F8EAF1;
+  color: #7B0948;
+  font-weight: 700;
+}
+
+table.data td {
+  color: #334155;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+table.data tr:hover td {
+  background: #FFF7FA;
+}
+
+/* Link kode tiket */
+table.data a {
+  color: #7B0948;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+table.data a:hover {
+  color: #A21CAF;
+  text-decoration: underline;
+}
+
+/* Status tiket */
+.tag.aktif {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+.tag.selesai {
+  background: #DCFCE7;
+  color: #166534;
+}
+
+/* Tombol hapus tiket */
+.btn.danger {
+  background: #DC2626;
+  color: #ffffff;
+}
+
+.btn.danger:hover {
+  background: #B91C1C;
+}
+
+/* Filter */
+#filter {
+  background: #ffffff;
+  color: #1f2937;
+  border: 1px solid #cbd5e1 !important;
+}
+
+/* Keterangan tabel */
+.table-wrap + .hint,
+.container .card > .hint {
+  color: #64748b !important;
+}
+
+/* Input */
+.container input {
+  background: #ffffff;
+  color: #1f2937;
+  border: 1px solid #cbd5e1;
+}
+
+.container label {
+  color: #334155;
+}
+
+.container .hint {
+  color: #64748b;
+}
+
+/* Tombol utama */
+.container .btn:not(.danger) {
+  background: #7B0948;
+  color: #ffffff;
+}
+
+.container .btn:not(.danger):hover {
+  background: #5F0738;
+}
+
+/* Pesan */
+.alert {
+  border-radius: 9px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .availability {
+    gap: 7px;
+  }
+
+  .availability .num {
+    font-size: 23px;
+  }
+
+  .slot-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .slot-box {
+    padding: 10px 4px;
+  }
+
+  .slot-box .aksi {
+    gap: 3px;
+  }
+
+  .slot-box .aksi button {
+    padding: 5px 6px;
+    font-size: 11px;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+  }
+}
+/* =================================
+   PERBAIKAN WARNA TEKS ADMIN
+   Hanya elemen yang diminta
+================================= */
+
+/* Judul Daftar Tiket */
+.container .card > .row h2 {
+  color: #000000 !important;
+}
+
+/* Label tarif dan kode slot */
+label[for="tarifPertama"],
+label[for="tarifPerJam"],
+label[for="kodeSlot"] {
+  color: #000000 !important;
+}
+
+/* Keterangan tarif dan kode slot */
+#tarifPerJam + .hint,
+#kodeSlot + .hint {
+  color: #000000 !important;
+}
+
+/* Keterangan durasi */
+#tarifPerJam ~ .hint {
+  color: #000000 !important;
+}
+
+/* Tulisan tombol Simpan Tarif dan Tambah Slot */
+#btnTarif,
+#btnSlot {
+  color: #ffffff !important;
+}
+
+/* =================================
+   FILTER PETA SLOT & TAMBAH SLOT
+================================= */
+.tab-baris {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.tab-kat {
+  background: #ffffff;
+  color: #7B0948;
+  border: 1px solid #7B0948;
+  border-radius: 99px;
+  padding: 7px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.tab-kat:hover {
+  background: #FFF7FA;
+}
+
+.tab-kat.aktif {
+  background: #7B0948;
+  color: #ffffff;
+}
+
+select.pilih {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 16px;
+  font-family: inherit;
+  background: #ffffff;
+  color: #1f2937;
+}
+/* =================================
+   BARIS FILTER DAFTAR TIKET
+================================= */
+.filter-baris {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.filter-baris select.pilih {
+  width: auto;
+  flex: 1 1 150px;
+  padding: 9px 12px;
+  font-size: 15px;
+}
+
+.filter-baris .btn {
+  flex: 0 0 auto;
+}
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <span class="brand">
+      <img src="/img/logo.png" alt="Universitas Nusa Putra">
+      <span class="brand-teks">Simulasi Parkir</span>
+    </span>
+    <a href="/masuk">Masuk</a>
+    <a href="/keluar">Keluar</a>
+    <a href="/admin" class="active">Admin</a>
+  </nav>
+
+  <main class="container">
+    <h1 class="hs">Admin</h1>
+    <p class="subtitlee">Pantau slot parkir, tiket, dan atur tarif. Data diperbarui otomatis tiap 10 detik.</p>
+
+    <div id="pesan" class="alert hidden"></div>
+
+    <!-- Ringkasan -->
+    <div class="availability">
+      <div class="box"><span class="num" id="jmlTotal">-</span><span class="lbl">Total slot</span></div>
+      <div class="box"><span class="num kosong" id="jmlKosong">-</span><span class="lbl">Kosong</span></div>
+      <div class="box"><span class="num terisi" id="jmlTerisi">-</span><span class="lbl">Terisi</span></div>
+    </div>
+
+    <!-- Peta slot -->
+    <div class="card">
+      <h2>Peta Slot</h2>
+      <div class="tab-baris" id="tabKat">
+        <button type="button" class="tab-kat aktif" data-filter="">Semua</button>
+        <button type="button" class="tab-kat" data-filter="motor">Motor</button>
+        <button type="button" class="tab-kat" data-filter="mobil">Mobil</button>
+      </div>
+      <div class="slot-grid" id="slotGrid"></div>
+    </div>
+
+    <!-- Tarif & tambah slot -->
+    <div class="row" style="align-items:stretch">
+      <div class="card">
+        <h2>Tarif Parkir</h2>
+        <div class="field">
+          <label for="tarifPertama">Jam pertama (Rp)</label>
+          <input type="number" id="tarifPertama" min="0" step="500">
+        </div>
+        <div class="field">
+          <label for="tarifPerJam">Tiap jam berikutnya (Rp)</label>
+          <input type="number" id="tarifPerJam" min="0" step="500">
+          <div class="hint">Durasi dibulatkan ke atas per jam.</div>
+        </div>
+        <button class="btn" id="btnTarif">Simpan Tarif</button>
+      </div>
+
+      <div class="card">
+        <h2>Tambah Slot</h2>
+        <div class="field">
+          <label for="kategoriSlot">Jenis kendaraan</label>
+          <select id="kategoriSlot" class="pilih">
+            <option value="motor">Motor</option>
+            <option value="mobil">Mobil</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="kodeSlot">Kode slot atau rentang</label>
+          <input type="text" id="kodeSlot" placeholder="contoh: C001-C015" maxlength="21" autocomplete="off">
+          <div class="hint" id="previewSlot">Tulis satu kode (C001) atau rentang (C001-C015). Maksimal 300 slot sekali buat.</div>
+        </div>
+        <button class="btn" id="btnSlot">Tambah Slot</button>
+      </div>
+    </div>
+
+    <!-- Daftar tiket -->
+    <div class="card">
+      <div class="row" style="align-items:center;margin-bottom:12px">
+        <h2 style="margin:0">Daftar Tiket</h2>
+      </div>
+
+      <div class="field" style="margin-bottom:10px">
+        <input type="text" id="cari" placeholder="Cari kode tiket, plat nomor, atau slot..." autocomplete="off">
+      </div>
+
+      <div class="filter-baris">
+        <select id="filter" class="pilih">
+          <option value="">Semua status</option>
+          <option value="aktif">Aktif</option>
+          <option value="selesai">Selesai</option>
+        </select>
+        <select id="filterBlok" class="pilih">
+          <option value="">Semua tempat</option>
+        </select>
+        <button class="btn small danger" id="btnHapusSemua">Hapus yang Selesai</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data">
+          <thead>
+            <tr>
+              <th>Kode</th><th>Slot</th><th>Plat</th><th>Masuk</th>
+              <th>Keluar</th><th>Biaya</th><th>Status</th><th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyTiket"></tbody>
+        </table>
+      </div>
+      <div class="hint" style="margin-top:8px">Menampilkan maksimal 100 tiket terbaru. Klik kode tiket untuk membuka tiket digitalnya.</div>
+    </div>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let timerPesan = null;
+
+    // ---------- Helper ----------
+    function esc(s) {
+      return String(s ?? '').replace(/[&<>"']/g, (c) => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+      ));
+    }
+    function rupiah(n) {
+      return n == null ? '-' : 'Rp' + Number(n).toLocaleString('id-ID');
+    }
+    function waktu(iso) {
+      return iso ? new Date(iso).toLocaleString('id-ID') : '-';
+    }
+    function tampilPesan(teks, jenis) {
+      const el = $('pesan');
+      el.textContent = teks;
+      el.className = 'alert ' + jenis;
+      clearTimeout(timerPesan);
+      timerPesan = setTimeout(() => el.classList.add('hidden'), 5000);
+    }
+
+    // ---------- Ringkasan & peta slot ----------
+    let semuaSlot = [];
+    let filterKat = ''; // '' = semua, 'motor', 'mobil'
+
+    function labelTab() {
+      const hitung = (k) => {
+        const l = semuaSlot.filter((x) => x.kategori === k);
+        return { total: l.length, kosong: l.filter((x) => x.status === 'kosong').length };
+      };
+      const m = hitung('motor');
+      const c = hitung('mobil');
+      $('tabKat').querySelector('[data-filter=""]').textContent = 'Semua (' + semuaSlot.length + ')';
+      $('tabKat').querySelector('[data-filter="motor"]').textContent =
+        'Motor (' + m.kosong + ' kosong dari ' + m.total + ')';
+      $('tabKat').querySelector('[data-filter="mobil"]').textContent =
+        'Mobil (' + c.kosong + ' kosong dari ' + c.total + ')';
+    }
+
+    function gambarSlot() {
+      const daftar = filterKat ? semuaSlot.filter((x) => x.kategori === filterKat) : semuaSlot;
+
+      if (!daftar.length) {
+        $('slotGrid').innerHTML =
+          '<p class="hint" style="grid-column:1/-1">Belum ada slot untuk jenis kendaraan ini.</p>';
+        return;
+      }
+
+      $('slotGrid').innerHTML = daftar.map((x) => {
+        const terisi = x.status === 'terisi';
+        const jenis = x.kategori === 'mobil' ? 'Mobil' : 'Motor';
+        const judul = terisi
+          ? `${jenis}, ${x.tiket}, masuk ${waktu(x.waktu_masuk)}`
+          : `${jenis}, kosong`;
+        return `<div class="slot-box ${esc(x.status)}" title="${esc(judul)}">
+          <span class="kode">${esc(x.kode)}</span>
+          ${terisi ? `<span class="plat">${esc(x.plat || 'tanpa plat')}</span>` : 'Kosong'}
+          <div class="aksi">
+            <button data-aksi="ubah" data-id="${x.id}" data-kode="${esc(x.kode)}">Ubah</button>
+            <button data-aksi="hapus" data-id="${x.id}" data-kode="${esc(x.kode)}"
+              ${terisi ? 'disabled title="Slot sedang terisi"' : ''}>Hapus</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    // Isi pilihan filter tempat (A, B, C, ...) dari kode slot yang ada
+    function isiBlok() {
+      const hitung = {};
+      for (const s of semuaSlot) {
+        const m = String(s.kode).match(/^[A-Z]+/);
+        if (m) hitung[m[0]] = (hitung[m[0]] || 0) + 1;
+      }
+      const daftar = Object.keys(hitung).sort();
+      const sekarang = $('filterBlok').value;
+
+      const opsi = '<option value="">Semua tempat</option>' + daftar.map((b) =>
+        `<option value="${esc(b)}">Tempat ${esc(b)} (${hitung[b]} slot)</option>`
+      ).join('');
+
+      // Diubah hanya kalau daftarnya berbeda, supaya pilihan tidak hilang saat data diperbarui
+      if ($('filterBlok').dataset.isi !== opsi) {
+        $('filterBlok').innerHTML = opsi;
+        $('filterBlok').dataset.isi = opsi;
+        $('filterBlok').value = daftar.includes(sekarang) ? sekarang : '';
+      }
+    }
+
+    async function muatSlot() {
+      const [s, slots] = await Promise.all([
+        fetch('/api/status').then((r) => r.json()),
+        fetch('/api/admin/slots').then((r) => r.json()),
+      ]);
+
+      $('jmlTotal').textContent = s.total;
+      $('jmlKosong').textContent = s.kosong;
+      $('jmlTerisi').textContent = s.terisi;
+
+      semuaSlot = slots;
+      labelTab();
+      gambarSlot();
+      isiBlok();
+    }
+
+    // Filter peta slot per jenis kendaraan
+    $('tabKat').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-filter]');
+      if (!b) return;
+      filterKat = b.dataset.filter;
+      document.querySelectorAll('#tabKat .tab-kat').forEach((t) =>
+        t.classList.toggle('aktif', t === b)
+      );
+      gambarSlot();
+    });
+
+    // ---------- Daftar tiket ----------
+    let nomorMuat = 0;
+
+    async function muatTiket() {
+      const ke = ++nomorMuat;
+      const p = new URLSearchParams();
+      const status = $('filter').value;
+      const blok = $('filterBlok').value;
+      const q = $('cari').value.trim();
+      if (status) p.set('status', status);
+      if (blok) p.set('blok', blok);
+      if (q) p.set('q', q);
+
+      const rows = await fetch('/api/admin/tiket' + (p.toString() ? '?' + p.toString() : ''))
+        .then((r) => r.json());
+      if (ke !== nomorMuat) return; // ada pencarian yang lebih baru, abaikan hasil ini
+
+      const adaFilter = status || blok || q;
+      $('tbodyTiket').innerHTML = rows.length
+        ? rows.map((t) => `<tr>
+            <td><a href="/t/${encodeURIComponent(t.kode)}" target="_blank">${esc(t.kode)}</a></td>
+            <td>${esc(t.slot)}</td>
+            <td>${esc(t.plat || '-')}</td>
+            <td>${esc(waktu(t.waktu_masuk))}</td>
+            <td>${esc(waktu(t.waktu_keluar))}</td>
+            <td>${esc(rupiah(t.biaya))}</td>
+            <td><span class="tag ${esc(t.status)}">${esc(t.status)}</span></td>
+            <td><button class="btn small danger" data-hapus="${esc(t.kode)}" data-status="${esc(t.status)}">Hapus</button></td>
+          </tr>`).join('')
+        : `<tr><td colspan="8" style="text-align:center;color:var(--muted)">${
+            adaFilter ? 'Tidak ada tiket yang cocok' : 'Belum ada tiket'
+          }</td></tr>`;
+    }
+
+    // ---------- Tarif ----------
+    async function muatTarif() {
+      const d = await fetch('/api/admin/settings').then((r) => r.json());
+      $('tarifPertama').value = d.tarif_jam_pertama;
+      $('tarifPerJam').value = d.tarif_per_jam;
+    }
+
+    $('btnTarif').addEventListener('click', async () => {
+      try {
+        const r = await fetch('/api/admin/settings', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tarif_jam_pertama: $('tarifPertama').value,
+            tarif_per_jam: $('tarifPerJam').value,
+          }),
+        });
+        const d = await r.json();
+        if (!r.ok) return tampilPesan(d.error || 'Gagal menyimpan tarif.', 'error');
+        tampilPesan('Tarif disimpan. Berlaku untuk perhitungan biaya berikutnya.', 'success');
+      } catch (e) {
+        tampilPesan('Tidak dapat terhubung ke server.', 'error');
+      }
+    });
+
+    // ---------- Tambah slot (satu kode atau rentang) ----------
+    const HINT_AWAL = 'Tulis satu kode (C001) atau rentang (C001-C015). Maksimal 300 slot sekali buat.';
+
+    // Aturan sama dengan di server, dipakai untuk pratinjau saat mengetik
+    function hitungRentang(teks) {
+      const t = String(teks || '').trim().toUpperCase().replace(/\s+/g, '');
+      if (t === '') return null;
+
+      const m = t.match(/^([A-Z]+)(\d+)-([A-Z]*)(\d+)$/);
+      if (!m) {
+        if (!/^[A-Z0-9-]{1,10}$/.test(t)) {
+          return { error: 'Kode tidak valid. Contoh: C001-C015 atau C001' };
+        }
+        return { jumlah: 1, pertama: t, terakhir: t };
+      }
+
+      const awalan = m[1];
+      const a = parseInt(m[2], 10);
+      const b = parseInt(m[4], 10);
+      if (m[3] && m[3] !== awalan) return { error: 'Huruf awal dan akhir harus sama, contoh: C001-C015' };
+      if (b < a) return { error: 'Nomor akhir harus lebih besar dari nomor awal' };
+      if (b - a + 1 > 300) return { error: 'Maksimal 300 slot sekali buat' };
+
+      const lebar = m[2].length;
+      const pertama = awalan + String(a).padStart(lebar, '0');
+      const terakhir = awalan + String(b).padStart(lebar, '0');
+      if (pertama.length > 10 || terakhir.length > 10) {
+        return { error: 'Kode terlalu panjang (maksimal 10 karakter)' };
+      }
+      return { jumlah: b - a + 1, pertama, terakhir };
+    }
+
+    function perbaruiPreview() {
+      const h = hitungRentang($('kodeSlot').value);
+      const el = $('previewSlot');
+      if (!h) el.textContent = HINT_AWAL;
+      else if (h.error) el.textContent = 'Tidak valid: ' + h.error;
+      else if (h.jumlah === 1) el.textContent = 'Akan dibuat 1 slot: ' + h.pertama;
+      else el.textContent = 'Akan dibuat ' + h.jumlah + ' slot: ' + h.pertama + ' sampai ' + h.terakhir;
+    }
+    $('kodeSlot').addEventListener('input', perbaruiPreview);
+
+    async function tambahSlot() {
+      try {
+        const r = await fetch('/api/admin/slots', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ kode: $('kodeSlot').value, kategori: $('kategoriSlot').value }),
+        });
+        const d = await r.json();
+        if (!r.ok) return tampilPesan(d.error || 'Gagal menambah slot.', 'error');
+
+        const rentang = d.pertama === d.terakhir ? d.pertama : d.pertama + ' sampai ' + d.terakhir;
+        let teks = d.dibuat + ' slot ' + d.kategori + ' ditambahkan (' + rentang + ').';
+        if (d.dilewati > 0) teks += ' ' + d.dilewati + ' kode sudah ada, dilewati.';
+        tampilPesan(teks, 'success');
+
+        $('kodeSlot').value = '';
+        perbaruiPreview();
+        muatSlot();
+      } catch (e) {
+        tampilPesan('Tidak dapat terhubung ke server.', 'error');
+      }
+    }
+    $('btnSlot').addEventListener('click', tambahSlot);
+    $('kodeSlot').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') tambahSlot();
+    });
+
+    // ---------- Ubah & hapus slot ----------
+    $('slotGrid').addEventListener('click', async (e) => {
+      const btn = e.target.closest('[data-aksi]');
+      if (!btn || btn.disabled) return;
+
+      const id = btn.dataset.id;
+      const kode = btn.dataset.kode;
+
+      try {
+        if (btn.dataset.aksi === 'ubah') {
+          const input = prompt('Ubah kode slot ' + kode + ' menjadi:', kode);
+          if (input === null) return;               // dibatalkan
+          const baru = input.trim().toUpperCase();
+          if (baru === '' || baru === kode) return; // tidak ada perubahan
+
+          const r = await fetch('/api/admin/slots/' + id, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ kode: baru }),
+          });
+          const d = await r.json();
+          if (!r.ok) return tampilPesan(d.error || 'Gagal mengubah slot.', 'error');
+          tampilPesan('Slot ' + kode + ' diubah menjadi ' + d.kode + '.', 'success');
+        } else {
+          const tanya =
+            'Hapus slot ' + kode + '?\n\n' +
+            'Riwayat tiket selesai di slot ini juga ikut terhapus.\n' +
+            'Tindakan ini tidak bisa dibatalkan.';
+          if (!confirm(tanya)) return;
+
+          const r = await fetch('/api/admin/slots/' + id, { method: 'DELETE' });
+          const d = await r.json();
+          if (!r.ok) return tampilPesan(d.error || 'Gagal menghapus slot.', 'error');
+          tampilPesan('Slot ' + kode + ' dihapus.', 'success');
+        }
+        perbarui();
+      } catch (err) {
+        tampilPesan('Tidak dapat terhubung ke server.', 'error');
+      }
+    });
+
+    // ---------- Hapus tiket ----------
+    $('tbodyTiket').addEventListener('click', async (e) => {
+      const btn = e.target.closest('[data-hapus]');
+      if (!btn) return;
+
+      const kode = btn.dataset.hapus;
+      const aktif = btn.dataset.status === 'aktif';
+      const tanya = aktif
+        ? `Hapus tiket ${kode}?\n\nTiket ini MASIH AKTIF (kendaraan belum keluar). Slotnya akan dikosongkan dan tiketnya tidak bisa dipakai lagi.\n\nTindakan ini tidak bisa dibatalkan.`
+        : `Hapus tiket ${kode} dari riwayat?\n\nTindakan ini tidak bisa dibatalkan.`;
+      if (!confirm(tanya)) return;
+
+      try {
+        const r = await fetch('/api/admin/tiket/' + encodeURIComponent(kode), { method: 'DELETE' });
+        const d = await r.json();
+        if (!r.ok) return tampilPesan(d.error || 'Gagal menghapus tiket.', 'error');
+        tampilPesan('Tiket ' + kode + ' dihapus.', 'success');
+        perbarui();
+      } catch (err) {
+        tampilPesan('Tidak dapat terhubung ke server.', 'error');
+      }
+    });
+
+    $('btnHapusSemua').addEventListener('click', async () => {
+      const ketik = prompt(
+        'Ini akan menghapus SEMUA tiket yang sudah SELESAI.\n' +
+        'Tiket yang masih AKTIF (kendaraan masih parkir) tidak ikut terhapus.\n' +
+        'Tindakan ini tidak bisa dibatalkan.\n\nKetik HAPUS untuk melanjutkan:'
+      );
+      if (ketik === null) return; // dibatalkan
+      if (ketik.trim() !== 'HAPUS') {
+        return tampilPesan('Dibatalkan: kata konfirmasi tidak cocok.', 'info');
+      }
+
+      try {
+        const r = await fetch('/api/admin/tiket', { method: 'DELETE' });
+        const d = await r.json();
+        if (!r.ok) return tampilPesan(d.error || 'Gagal menghapus tiket.', 'error');
+
+        const sisaAktif = d.aktif_dipertahankan
+          ? ' ' + d.aktif_dipertahankan + ' tiket aktif tetap ada.'
+          : '';
+        if (d.dihapus === 0) {
+          tampilPesan('Tidak ada tiket selesai untuk dihapus.' + sisaAktif, 'info');
+        } else {
+          tampilPesan(d.dihapus + ' tiket selesai dihapus.' + sisaAktif, 'success');
+        }
+        perbarui();
+      } catch (err) {
+        tampilPesan('Tidak dapat terhubung ke server.', 'error');
+      }
+    });
+
+    // ---------- Muat & perbarui otomatis ----------
+    $('filter').addEventListener('change', muatTiket);
+    $('filterBlok').addEventListener('change', muatTiket);
+
+    // Pencarian berjalan otomatis sebentar setelah berhenti mengetik
+    let timerCari = null;
+    $('cari').addEventListener('input', () => {
+      clearTimeout(timerCari);
+      timerCari = setTimeout(muatTiket, 250);
+    });
+
+    async function perbarui() {
+      try {
+        await Promise.all([muatSlot(), muatTiket()]);
+      } catch (e) {
+        tampilPesan('Tidak dapat terhubung ke server.', 'error');
+      }
+    }
+
+    muatTarif();
+    perbarui();
+    setInterval(perbarui, 10000);
+  </script>
+</body>
+</html>

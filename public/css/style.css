@@ -1,0 +1,284 @@
+:root {
+  --bg: #f4f6fa;
+  --card: #7B0948;
+  --text: #ffffff;
+  --muted: #ffffff;
+  --border: #dfe4ec;
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --ok: #ffffff;
+  --ok-bg: #7B0948;
+  --danger: #ff0000;
+  --danger-bg: #fee2e2;
+  --warn-bg: #fef3c7;
+  --hs-bg: #000000;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+/* ---------- Navigasi ---------- */
+.nav {
+  background: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 20px;
+  flex-wrap: wrap;
+}
+.nav .brand {
+  color: #000000;
+  font-weight: 700;
+  margin-right: 18px;
+  padding: 14px 0;
+}
+.nav a {
+  color: #000000;
+  text-decoration: none;
+  padding: 14px 14px;
+  font-size: 15px;
+}
+.nav a:hover { color: #7B0948; }
+.nav a.active { color: #7B0948; box-shadow: inset 0 -3px 0 var(--primary); }
+
+/* ---------- Layout ---------- */
+.container {
+  max-width: 920px;
+  margin: 28px auto;
+  padding: 0 16px;
+}
+.container.narrow { max-width: 460px; }
+
+h1 { font-size: 24px; margin: 0 0 4px; }
+h2 { font-size: 18px; margin: 0 0 12px; }
+.subtitle { color: var(--muted); margin: 0 0 20px; }
+.subtitlee { color: var(--hs-bg); margin: 0 0 20px; }
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px;
+  margin-bottom: 20px;
+}
+
+.hs {
+  color: var(--hs-bg);
+}
+
+/* ---------- Form & tombol ---------- */
+label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+
+input[type="text"],
+input[type="number"] {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 16px;
+  font-family: inherit;
+}
+input:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 0;
+  border-color: var(--primary);
+}
+
+.field { margin-bottom: 16px; }
+.hint { font-size: 13px; color: var(--bg); margin-top: 4px; }
+.hintt { font-size: 13px; color: var(--hs-bg); margin-top: 4px; }
+
+.btn {
+  display: inline-block;
+  width: 100%;
+  padding: 14px 18px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn:hover { background: #b99696; }
+.btn:disabled { background: #ffffff; cursor: not-allowed; }
+.btn.secondary { background: #e2e8f0; color: var(--card); }
+.btn.secondary { background: #ffffff; color: var(--card); }
+.btn.secondary:hover { background: #dac3c3; }
+.btn.small { width: auto; padding: 8px 14px; font-size: 14px; }
+
+/* ---------- Pesan ---------- */
+.alert {
+  padding: 12px 14px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 15px;
+}
+.alert.error { background: var(--danger-bg); color: #ffffff; }
+.alert.success { background: var(--ok-bg); color: #ffffff; }
+.alert.info { background: var(--warn-bg); color: #854d0e; }
+.hidden { display: none !important; }
+
+/* ---------- Badge ketersediaan ---------- */
+.availability {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.availability .box {
+  flex: 1;
+  text-align: center;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 8px;
+}
+.availability .num { font-size: 28px; font-weight: 700; display: block; }
+.availability .lbl { font-size: 13px; color: var(--bg); }
+.num.kosong { color: var(--ok); }
+.num.terisi { color: var(--danger); }
+
+/* ---------- Tiket ---------- */
+.ticket {
+  background: #7B0948;
+  border: 2px dashed #ffffff;
+  border-radius: 14px;
+  padding: 22px;
+  text-align: center;
+}
+.ticket .title {
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.ticket .slot {
+  font-size: 56px;
+  font-weight: 800;
+  color: var(--bg);
+  line-height: 1.1;
+  margin: 6px 0 2px;
+}
+.ticket .slot-label { color: var(--muted); font-size: 14px; }
+.ticket img { width: 220px; height: 220px; margin: 14px auto 8px; display: block; }
+.ticket .kode {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.ticket .info {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed #cbd5e1;
+  font-size: 14px;
+  color: var(--muted);
+  text-align: left;
+}
+.ticket .info div { display: flex; justify-content: space-between; padding: 2px 0; }
+.ticket .info b { color: var(--text); }
+
+/* ---------- Detail baris (halaman keluar) ---------- */
+.detail { width: 100%; font-size: 15px; }
+.detail td { padding: 6px 0; }
+.detail td:last-child { text-align: right; font-weight: 600; }
+.total-row td {
+  border-top: 2px solid var(----bg);
+  padding-top: 12px;
+  font-size: 20px;
+  color: var(--bg);
+}
+
+/* ---------- Scanner ---------- */
+#reader {
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.divider {
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  margin: 16px 0;
+}
+
+/* ---------- Admin: peta slot ---------- */
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 10px;
+}
+.slot-box {
+  border-radius: 10px;
+  padding: 10px 6px;
+  text-align: center;
+  border: 1px solid var(--border);
+  font-size: 13px;
+}
+.slot-box .kode { font-size: 18px; font-weight: 700; display: block; }
+.slot-box.kosong { background: var(--ok-bg); border-color: #000000; color: #ffffff; }
+.slot-box.terisi { background: var(--danger-bg); border-color: #ffffff; color: #000000; }
+.slot-box .plat { font-size: 12px; font-weight: 600; display: block; margin-top: 2px; }
+
+/* ---------- Tabel ---------- */
+.table-wrap { overflow-x: auto; }
+table.data { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.data th, table.data td {
+  text-align: left;
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+table.data th { color: var(--hs-bg); font-weight: 600; background: #f8fafc; }
+.tag {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.tag.aktif { background: var(--warn-bg); color: #854d0e; }
+.tag.selesai { background: var(--ok-bg); color: #166534; }
+
+.row { display: flex; gap: 12px; }
+.row > * { flex: 1; }
+
+@media print {
+  .nav, .no-print { display: none !important; }
+  body { background: #fff; }
+  .container { margin: 0 auto; }
+  .card { border: 0; padding: 0; }
+}
+
+.digital-title {
+  color: #000000 !important;
+}
+
+.digital-description {
+  color: #000000 !important;
+}
+/* ---------- Logo di navbar ---------- */
+.nav .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  margin-right: 18px;
+}
+.nav .brand img { height: 46px; width: auto; display: block; }
+.nav .brand-teks { color: #7B0948; font-weight: 800; font-size: 16px; }
+
+@media (max-width: 520px) {
+  .nav .brand-teks { display: none; }
+}
+
+/* ---------- Teks pesan galat agar terbaca ---------- */
+.alert.error { color: #7f1d1d; }

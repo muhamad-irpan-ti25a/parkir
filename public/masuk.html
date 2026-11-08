@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gerbang Masuk - Simulasi Parkir</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .print-only { display: none; }
+    .kolom { max-width: 460px; width: 100%; margin: 0 auto; }
+
+    .qr-besar {
+      display: block;
+      width: 100%;
+      max-width: 320px;
+      margin: 0 auto 10px;
+      background: #fff;
+      border-radius: 12px;
+    }
+    .qr-wrap { text-align: center; }
+    .qr-wrap .kode {
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    /* ===== Layar pilih kategori (background penuh) ===== */
+    body.mode-kategori { background: #7B0948; }
+    body.mode-kategori main {
+      margin: 0 auto;
+      padding: 24px 16px;
+      min-height: calc(100vh - var(--nav-h, 0px));
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .kat-judul {
+      color: #ffffff;
+      font-size: clamp(28px, 5vw, 44px);
+      text-align: center;
+      margin: 0 0 6px;
+    }
+    .kat-sub {
+      color: rgba(255, 255, 255, 0.88);
+      font-size: 18px;
+      text-align: center;
+      margin: 0 0 28px;
+    }
+    .kat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      width: 100%;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .kat-kartu {
+      background: #ffffff;
+      color: #7B0948;
+      border: 0;
+      border-radius: 22px;
+      padding: 28px 18px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      font-family: inherit;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+      transition: transform 0.15s ease;
+    }
+    .kat-kartu:hover:not(:disabled) { transform: translateY(-4px); }
+    .kat-kartu:active:not(:disabled) { transform: translateY(0); }
+    .kat-kartu:disabled { opacity: 0.55; cursor: not-allowed; }
+    .kat-kartu:focus-visible { outline: 4px solid #ffffff; outline-offset: 4px; }
+    .kat-ikon { width: 150px; height: 90px; }
+    .kat-nama { font-size: 30px; font-weight: 800; }
+    .kat-info { font-size: 16px; color: #6b4a5c; }
+    .pesan-kat {
+      max-width: 720px;
+      width: 100%;
+      margin: 20px auto 0;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: #ffffff;
+      color: #7B0948;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    /* ===== Layar ambil tiket ===== */
+    .badge-kat {
+      --roda: #7B0948;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #7B0948;
+      color: #ffffff;
+      padding: 4px 16px 4px 10px;
+      border-radius: 99px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .badge-ikon { width: 40px; height: 24px; }
+    .link-kembali {
+      background: none;
+      border: 0;
+      padding: 8px 0;
+      margin-bottom: 8px;
+      color: #7B0948;
+      font-weight: 700;
+      font-family: inherit;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    .link-kembali:hover { text-decoration: underline; }
+
+    @media print {
+      .layar { display: none !important; }
+      .print-only { display: block !important; }
+    }
+  </style>
+</head>
+<body class="mode-kategori">
+
+  <!-- Ikon motor dan mobil (dipakai berulang lewat <use>) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="ikon-motor" viewBox="0 0 120 72">
+      <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="24" cy="52" r="13"/>
+        <circle cx="98" cy="52" r="13"/>
+        <path d="M12 34 L24 32 H48"/>
+        <path d="M48 32 L54 23 H72 L78 32 Z"/>
+        <path d="M48 38 H70 V52 H48 Z"/>
+        <path d="M24 52 L48 46"/>
+        <path d="M98 52 L84 24 L92 19"/>
+        <path d="M78 32 L84 34"/>
+      </g>
+    </symbol>
+    <symbol id="ikon-mobil" viewBox="0 0 120 72">
+      <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 54 V42 Q10 36 16 35 L30 32 L42 15 Q44 12 48 12 H76 Q80 12 82 15 L92 32 L104 35 Q110 36 110 42 V54 H96 M72 54 H48 M24 54 H10"/>
+        <path d="M44 30 L51 18 H58 V30 Z M64 30 V18 H74 L81 30 Z"/>
+        <circle cx="36" cy="54" r="10" style="fill:var(--roda,#fff)"/>
+        <circle cx="84" cy="54" r="10" style="fill:var(--roda,#fff)"/>
+      </g>
+    </symbol>
+  </svg>
+
+  <nav class="nav no-print" id="nav">
+    <span class="brand">
+      <img src="/img/logo.png" alt="Universitas Nusa Putra">
+      <span class="brand-teks">Simulasi Parkir</span>
+    </span>
+    <a href="/masuk" class="active">Masuk</a>
+    <a href="/keluar">Keluar</a>
+    <a href="/admin">Admin</a>
+  </nav>
+
+  <main class="container">
+
+    <div class="layar">
+
+      <!-- ===== Layar 1: pilih jenis kendaraan ===== -->
+      <section id="pilihKategori">
+        <h1 class="kat-judul">Pilih jenis kendaraan</h1>
+        <p class="kat-sub">Sentuh salah satu untuk melanjutkan.</p>
+
+        <div class="kat-grid">
+          <button type="button" class="kat-kartu" id="kartuMotor" data-kategori="motor">
+            <svg class="kat-ikon" aria-hidden="true"><use href="#ikon-motor"/></svg>
+            <span class="kat-nama">Motor</span>
+            <span class="kat-info" id="infoMotor">Memuat...</span>
+          </button>
+
+          <button type="button" class="kat-kartu" id="kartuMobil" data-kategori="mobil">
+            <svg class="kat-ikon" aria-hidden="true"><use href="#ikon-mobil"/></svg>
+            <span class="kat-nama">Mobil</span>
+            <span class="kat-info" id="infoMobil">Memuat...</span>
+          </button>
+        </div>
+
+        <div id="pesanKat" class="pesan-kat hidden"></div>
+      </section>
+
+      <!-- ===== Layar 2: ambil tiket ===== -->
+      <section id="layarTiket" class="kolom hidden">
+        <button type="button" class="link-kembali" id="btnGanti">← Ganti jenis kendaraan</button>
+
+        <h1 class="hs">Gerbang Masuk</h1>
+        <p class="subtitlee">Tekan tombol untuk mengambil tiket parkir.</p>
+
+        <span class="badge-kat">
+          <svg class="badge-ikon" aria-hidden="true"><use id="badgeIkon" href="#ikon-motor"/></svg>
+          <span id="badgeNama">Motor</span>
+        </span>
+
+        <div class="availability">
+          <div class="box">
+            <span class="num kosong" id="jmlKosong">-</span>
+            <span class="lbl">Slot kosong</span>
+          </div>
+          <div class="box">
+            <span class="num terisi" id="jmlTerisi">-</span>
+            <span class="lbl">Terisi</span>
+          </div>
+        </div>
+
+        <div id="pesan" class="alert error hidden"></div>
+
+        <!-- Siap mengambil tiket -->
+        <div class="card" id="formCard">
+          <div class="field" id="fieldPlat">
+            <label for="plat">Plat nomor (opsional)</label>
+            <input type="text" id="plat" placeholder="contoh: B 1234 XYZ" maxlength="15" autocomplete="off">
+            <div class="hint">Boleh dikosongkan. Pembacaan plat otomatis belum tersedia.</div>
+          </div>
+          <button class="btn" id="btnTiket">Ambil Tiket</button>
+        </div>
+
+        <!-- QR tampil setelah tiket dibuat -->
+        <div class="card qr-wrap hidden" id="qrArea">
+          <h2>Scan dengan HP Anda</h2>
+          <img id="qrBesar" class="qr-besar" alt="QR tiket digital">
+          <div class="kode" id="qKode">-</div>
+          <div class="hint">Buka kamera HP, arahkan ke QR ini, lalu tiket digital akan terbuka.</div>
+
+          <div class="alert info" style="margin-top:16px">
+            Tiket berikutnya siap dalam <b id="sisa">0</b> detik
+          </div>
+          <button class="btn secondaryy" id="btnBerikutnya">Kendaraan Berikutnya</button>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ===== Struk cetak (hanya muncul saat dicetak) ===== -->
+    <div class="print-only" id="struk">
+      <div class="ticket">
+        <div class="title">Tiket Parkir</div>
+        <div class="slot" id="sSlot">-</div>
+        <div class="slot-label">Nomor tempat parkir Anda</div>
+        <img id="sQr" alt="QR keluar">
+        <div class="kode" id="sKode">-</div>
+        <div class="info">
+          <div><span>Jenis kendaraan</span><b id="sJenis">-</b></div>
+          <div><span>Plat nomor</span><b id="sPlat">-</b></div>
+          <div><span>Waktu masuk</span><b id="sWaktu">-</b></div>
+        </div>
+        <div class="hint" style="margin-top:10px">Scan QR ini di gerbang keluar.</div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    // ---------- Pengaturan ----------
+    const params = new URLSearchParams(location.search);
+    const KIOSK = params.get('kiosk') === '1'; // sembunyikan menu dan input plat
+    const CETAK = params.get('cetak') === '1'; // cetak struk otomatis dari mesin
+    const WAKTU_TUNGGU = 20;                   // detik, jeda sebelum tiket berikutnya
+    const NAMA = { motor: 'Motor', mobil: 'Mobil' };
+
+    let kategori = null;       // jenis kendaraan yang dipilih
+    let status = null;         // data dari /api/status
+    let sedangMengambil = false;
+    let timerTunggu = null;
+
+    if (KIOSK) {
+      $('nav').classList.add('hidden');
+      $('fieldPlat').classList.add('hidden');
+    }
+    if (CETAK) {
+      // ukuran kertas printer thermal 80 mm
+      const st = document.createElement('style');
+      st.textContent = '@page { size: 80mm auto; margin: 4mm; }';
+      document.head.appendChild(st);
+    }
+
+    // Tinggi navbar dipakai supaya layar pilih kategori pas satu layar
+    function ukurNav() {
+      const h = KIOSK ? 0 : $('nav').offsetHeight;
+      document.documentElement.style.setProperty('--nav-h', h + 'px');
+    }
+    window.addEventListener('resize', ukurNav);
+
+    // ---------- Pesan ----------
+    function tampilPesan(teks) {
+      const el = kategori ? $('pesan') : $('pesanKat');
+      el.textContent = teks;
+      el.classList.remove('hidden');
+    }
+    function sembunyiPesan() {
+      $('pesan').classList.add('hidden');
+      $('pesanKat').classList.add('hidden');
+    }
+
+    // ---------- Tampilan ----------
+    function render() {
+      if (!status) return;
+
+      for (const k of ['motor', 'mobil']) {
+        const s = status[k];
+        $('info' + NAMA[k]).textContent = s.kosong > 0 ? s.kosong + ' slot kosong' : 'Penuh';
+        $('kartu' + NAMA[k]).disabled = s.kosong === 0;
+      }
+
+      if (kategori) {
+        const s = status[kategori];
+        $('jmlKosong').textContent = s.kosong;
+        $('jmlTerisi').textContent = s.terisi;
+        $('btnTiket').disabled = s.kosong === 0 || sedangMengambil;
+        const formTampil = !$('formCard').classList.contains('hidden');
+        if (formTampil && s.kosong === 0) {
+          tampilPesan('Parkir ' + NAMA[kategori].toLowerCase() + ' penuh, tidak ada slot kosong.');
+        }
+      }
+    }
+
+    function tampilKategori() {
+      kategori = null;
+      document.body.classList.add('mode-kategori');
+      $('layarTiket').classList.add('hidden');
+      $('pilihKategori').classList.remove('hidden');
+      sembunyiPesan();
+      render();
+    }
+
+    function pilihKategori(k) {
+      kategori = k;
+      document.body.classList.remove('mode-kategori');
+      $('pilihKategori').classList.add('hidden');
+      $('layarTiket').classList.remove('hidden');
+      $('badgeIkon').setAttribute('href', '#ikon-' + k);
+      $('badgeNama').textContent = NAMA[k];
+      sembunyiPesan();
+      render();
+    }
+
+    async function muatStatus() {
+      try {
+        const r = await fetch('/api/status');
+        status = await r.json();
+        if (!kategori) $('pesanKat').classList.add('hidden');
+        render();
+      } catch (e) {
+        tampilPesan('Tidak dapat terhubung ke server.');
+      }
+    }
+
+    document.querySelectorAll('.kat-kartu').forEach((b) => {
+      b.addEventListener('click', () => pilihKategori(b.dataset.kategori));
+    });
+    $('btnGanti').addEventListener('click', tampilKategori);
+
+    // ---------- Ambil tiket ----------
+    $('btnTiket').addEventListener('click', async () => {
+      if (!kategori || sedangMengambil) return;
+      sembunyiPesan();
+      sedangMengambil = true;
+      $('btnTiket').disabled = true;
+
+      try {
+        const r = await fetch('/api/tiket', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plat: KIOSK ? '' : $('plat').value, kategori }),
+        });
+        const d = await r.json();
+
+        if (!r.ok) {
+          tampilPesan(d.error || 'Gagal mengambil tiket.');
+          await muatStatus();
+          return;
+        }
+
+        // QR di layar (isinya alamat tiket digital)
+        $('qrBesar').src = d.qr_url;
+        $('qKode').textContent = d.kode;
+
+        // Struk cetak (QR di struk berisi kode untuk scan di gerbang keluar)
+        $('sSlot').textContent = d.slot;
+        $('sQr').src = d.qr;
+        $('sKode').textContent = d.kode;
+        $('sJenis').textContent = NAMA[d.kategori] || '-';
+        $('sPlat').textContent = d.plat || '-';
+        $('sWaktu').textContent = new Date(d.waktu_masuk).toLocaleString('id-ID');
+
+        $('formCard').classList.add('hidden');
+        $('qrArea').classList.remove('hidden');
+        muatStatus();
+        mulaiTunggu();
+
+        if (CETAK) {
+          try { await $('sQr').decode(); } catch (e) {}
+          window.print(); // dengan --kiosk-printing langsung tercetak tanpa dialog
+        }
+      } catch (e) {
+        tampilPesan('Terjadi kesalahan jaringan.');
+      } finally {
+        sedangMengambil = false;
+        render();
+      }
+    });
+
+    // ---------- Masa tunggu ----------
+    function mulaiTunggu() {
+      let sisa = WAKTU_TUNGGU;
+      $('sisa').textContent = sisa;
+
+      clearInterval(timerTunggu);
+      timerTunggu = setInterval(() => {
+        sisa--;
+        $('sisa').textContent = sisa;
+        if (sisa <= 0) resetTampilan();
+      }, 1000);
+    }
+
+    // Kembali ke layar pilih kendaraan untuk pengendara berikutnya
+    function resetTampilan() {
+      clearInterval(timerTunggu);
+      $('plat').value = '';
+      $('qrArea').classList.add('hidden');
+      $('formCard').classList.remove('hidden');
+      tampilKategori();
+      muatStatus();
+    }
+
+    // Tombol untuk melewati jeda kalau antrean panjang
+    $('btnBerikutnya').addEventListener('click', resetTampilan);
+
+    // ---------- Mulai ----------
+    ukurNav();
+    tampilKategori();
+    muatStatus();
+    setInterval(muatStatus, 10000);
+  </script>
+</body>
+</html>

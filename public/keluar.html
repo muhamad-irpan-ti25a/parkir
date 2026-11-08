@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gerbang Keluar - Simulasi Parkir</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="nav">
+        <span class="brand">
+      <img src="/img/logo.png" alt="Universitas Nusa Putra">
+      <span class="brand-teks">Simulasi Parkir</span>
+    </span>
+    <a href="/masuk">Masuk</a>
+    <a href="/keluar" class="active">Keluar</a>
+    <a href="/admin">Admin</a>
+  </nav>
+
+  <main class="container narrow">
+    <h1 class="hs">Gerbang Keluar</h1>
+    <p class="subtitlee">Scan QR tiket untuk keluar dari area parkir.</p>
+
+    <div id="pesan" class="alert error hidden"></div>
+
+    <!-- Langkah 1: scan -->
+    <div class="card" id="scanCard">
+      <div id="reader"></div>
+      <button class="btn" id="btnScan">Mulai Scan Kamera</button>
+
+      <div class="divider">atau masukkan kode manual</div>
+
+      <div class="field">
+        <label for="kodeManual">Kode tiket</label>
+        <input type="text" id="kodeManual" placeholder="PK-XXXXXXXX" autocomplete="off" maxlength="20">
+      </div>
+      <button class="btn secondaryy" id="btnManual">Cek Tiket</button>
+    </div>
+
+    <!-- Langkah 2: konfirmasi -->
+    <div class="card hidden" id="detailCard">
+      <h2>Detail Tiket</h2>
+      <table class="detail">
+        <tr><td>Kode tiket</td><td id="dKode">-</td></tr>
+        <tr><td>Slot parkir</td><td id="dSlot">-</td></tr>
+        <tr><td>Plat nomor</td><td id="dPlat">-</td></tr>
+        <tr><td>Waktu masuk</td><td id="dMasuk">-</td></tr>
+        <tr><td>Durasi parkir</td><td id="dDurasi">-</td></tr>
+        <tr class="total-row"><td>Biaya</td><td id="dBiaya">-</td></tr>
+      </table>
+      <div class="row" style="margin-top:18px">
+        <button class="btn secondary" id="btnBatal">Batal</button>
+        <button class="btn" id="btnKonfirmasi">Konfirmasi Keluar</button>
+      </div>
+    </div>
+
+    <!-- Langkah 3: selesai -->
+    <div class="card hidden" id="hasilCard">
+      <div class="alert success">Pembayaran selesai. Palang terbuka, silakan keluar.</div>
+      <table class="detail">
+        <tr><td>Kode tiket</td><td id="hKode">-</td></tr>
+        <tr><td>Slot parkir</td><td id="hSlot">-</td></tr>
+        <tr><td>Waktu masuk</td><td id="hMasuk">-</td></tr>
+        <tr><td>Waktu keluar</td><td id="hKeluar">-</td></tr>
+        <tr><td>Durasi</td><td id="hDurasi">-</td></tr>
+        <tr class="total-row"><td>Total biaya</td><td id="hBiaya">-</td></tr>
+      </table>
+      <button class="btn" id="btnLagi" style="margin-top:18px">
+        Scan Berikutnya (<span id="sisa">10</span>)
+      </button>
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const WAKTU_RESET = 10; // detik, kembali otomatis ke layar scan setelah keluar
+
+    let scanner = null;
+    let tiketAktif = null;
+    let memproses = false;
+    let timerReset = null;
+
+    // ---------- Helper ----------
+    function tampilPesan(teks) {
+      $('pesan').textContent = teks;
+      $('pesan').classList.remove('hidden');
+    }
+    function sembunyiPesan() {
+      $('pesan').classList.add('hidden');
+    }
+    function rupiah(n) {
+      return 'Rp' + Number(n).toLocaleString('id-ID');
+    }
+    function formatDurasi(menit) {
+      const j = Math.floor(menit / 60);
+      const m = menit % 60;
+      return j === 0 ? m + ' menit' : j + ' jam ' + m + ' menit';
+    }
+    function waktuLokal(iso) {
+      return new Date(iso).toLocaleString('id-ID');
+    }
+    function tampilView(nama) {
+      ['scanCard', 'detailCard', 'hasilCard'].forEach((id) =>
+        $(id).classList.toggle('hidden', id !== nama)
+      );
+    }
+    // Menerima kode langsung atau alamat tiket digital (…/t/PK-XXXXXXXX)
+    function ambilKode(teks) {
+      const m = String(teks).toUpperCase().match(/PK-[0-9A-F]{8}/);
+      return m ? m[0] : null;
+    }
+
+    // ---------- Scanner kamera ----------
+    async function mulaiScan() {
+      if (scanner) return;
+      if (typeof Html5Qrcode === 'undefined') {
+        tampilPesan('Library scanner gagal dimuat (butuh internet). Gunakan input kode manual.');
+        return;
+      }
+      try {
+        scanner = new Html5Qrcode('reader');
+        await scanner.start(
+          { facingMode: 'environment' },
+          { fps: 10, qrbox: { width: 240, height: 240 } },
+          onScan,
+          () => {} // abaikan galat per-frame
+        );
+        $('btnScan').textContent = 'Hentikan Scan';
+      } catch (e) {
+        scanner = null;
+        tampilPesan('Kamera tidak bisa dibuka. Izinkan akses kamera, dan buka halaman ini lewat http://localhost:3000. Atau pakai input kode manual.');
+      }
+    }
+
+    async function hentikanScan() {
+      if (!scanner) return;
+      try {
+        await scanner.stop();
+        scanner.clear();
+      } catch (e) {}
+      scanner = null;
+      $('btnScan').textContent = 'Mulai Scan Kamera';
+    }
+
+    async function onScan(teks) {
+      if (memproses) return;
+      const kode = ambilKode(teks);
+      if (!kode) {
+        tampilPesan('QR tidak dikenali sebagai tiket parkir.');
+        return;
+      }
+      memproses = true;
+      await hentikanScan();
+      await cekTiket(kode);
+      memproses = false;
+    }
+
+    $('btnScan').addEventListener('click', () => {
+      sembunyiPesan();
+      scanner ? hentikanScan() : mulaiScan();
+    });
+
+    // ---------- Cek tiket ----------
+    async function cekTiket(kode) {
+      sembunyiPesan();
+      try {
+        const r = await fetch('/api/tiket/' + encodeURIComponent(kode));
+        const d = await r.json();
+
+        if (!r.ok) {
+          tampilPesan(d.error || 'Tiket tidak ditemukan.');
+          return;
+        }
+        if (d.status !== 'aktif') {
+          tampilPesan('Tiket ' + d.kode + ' sudah dipakai untuk keluar.');
+          return;
+        }
+
+        tiketAktif = d;
+        $('dKode').textContent = d.kode;
+        $('dSlot').textContent = d.slot;
+        $('dPlat').textContent = d.plat || '-';
+        $('dMasuk').textContent = waktuLokal(d.waktu_masuk);
+        $('dDurasi').textContent = formatDurasi(d.durasi_menit);
+        $('dBiaya').textContent = rupiah(d.biaya_sementara);
+        tampilView('detailCard');
+      } catch (e) {
+        tampilPesan('Tidak dapat terhubung ke server.');
+      }
+    }
+
+    function cekManual() {
+      const kode = ambilKode($('kodeManual').value);
+      if (!kode) {
+        tampilPesan('Format kode tidak valid. Contoh: PK-9F3A1C7E');
+        return;
+      }
+      hentikanScan().then(() => cekTiket(kode));
+    }
+    $('btnManual').addEventListener('click', cekManual);
+    $('kodeManual').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') cekManual();
+    });
+
+    // ---------- Konfirmasi keluar ----------
+    $('btnKonfirmasi').addEventListener('click', async () => {
+      if (!tiketAktif) return;
+      $('btnKonfirmasi').disabled = true;
+
+      try {
+        const r = await fetch('/api/keluar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ kode: tiketAktif.kode }),
+        });
+        const d = await r.json();
+
+        if (!r.ok) {
+          tampilPesan(d.error || 'Gagal memproses keluar.');
+          tampilView('scanCard');
+          return;
+        }
+
+        $('hKode').textContent = d.kode;
+        $('hSlot').textContent = d.slot + ' (kini kosong)';
+        $('hMasuk').textContent = waktuLokal(d.waktu_masuk);
+        $('hKeluar').textContent = waktuLokal(d.waktu_keluar);
+        $('hDurasi').textContent = formatDurasi(d.durasi_menit);
+        $('hBiaya').textContent = rupiah(d.biaya);
+        tampilView('hasilCard');
+        mulaiResetOtomatis();
+      } catch (e) {
+        tampilPesan('Tidak dapat terhubung ke server.');
+      } finally {
+        $('btnKonfirmasi').disabled = false;
+      }
+    });
+
+    // ---------- Kembali ke layar scan ----------
+    function kembaliKeScan() {
+      clearInterval(timerReset);
+      tiketAktif = null;
+      $('kodeManual').value = '';
+      sembunyiPesan();
+      tampilView('scanCard');
+      mulaiScan();
+    }
+
+    function mulaiResetOtomatis() {
+      let sisa = WAKTU_RESET;
+      $('sisa').textContent = sisa;
+      clearInterval(timerReset);
+      timerReset = setInterval(() => {
+        sisa--;
+        $('sisa').textContent = sisa;
+        if (sisa <= 0) kembaliKeScan();
+      }, 1000);
+    }
+
+    $('btnBatal').addEventListener('click', kembaliKeScan);
+    $('btnLagi').addEventListener('click', kembaliKeScan);
+
+    // Kamera langsung menyala saat halaman dibuka
+    mulaiScan();
+  </script>
+</body>
+</html>
